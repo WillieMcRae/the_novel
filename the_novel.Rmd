@@ -1,0 +1,112 @@
+---
+title: "The Novel"
+author: "An [Experiment In Art](https://experimentinart.com/) by [Willie McRae](https://williemcrae.com)"
+date: "2017-12-30"
+output: 
+  html_document:
+    css: EIA_styles.css
+    highlight: pygments
+    toc: yes
+    toc_float: yes
+---
+
+<img src="EIA_logo_notext.jpg" style="position:absolute;top:10px;right:0px; width:150px; height=150px" />
+
+
+```{r}
+# TODO - write a novel
+# TODO - learn text mining
+# TODO - analyse and report on the process and output 
+# TODO - automate the creation of files and storing of raw words
+
+```
+
+
+# Data collection
+
+Words are written daily in the Flowstate app, collected weekly and stored locally.  
+
+```{r, include = FALSE}
+# Set working directory
+setwd("/Users/williambidstrup/GitHub/the_novel")
+
+# Install and load packages
+install.packages("tidyverse", repos="http://cran.rstudio.com/")
+library(tidyverse)
+
+install.packages("tidytext", repos="http://cran.rstudio.com/")
+library(tidytext)
+
+install.packages("wordcloud", repos="http://cran.rstudio.com/")
+library(wordcloud)
+
+```
+
+```{r, include = FALSE}
+# Import new data (from local host database)
+new_novel <- read_lines("/Users/williambidstrup/Documents/Words/2012-12-30_the_novel.txt")
+
+# Make data frame
+new_novel <- data_frame(text = new_novel) #Insert number of lines as required
+
+# Make tidy
+new_novel_tidy <- new_novel %>%
+  unnest_tokens(word, text)
+
+# Add snapshot date
+new_novel_tidy$snapshot <- as.Date("2017-12-20")
+
+
+```
+
+
+
+# Insert code to combine when doing next import
+
+
+```{r, include = FALSE}
+# TODO - find a way to remove numbers via REGEX
+
+# No stop_words set
+data(stop_words)
+
+novel_clean <- new_novel_tidy %>%
+  anti_join(stop_words)
+```
+
+```{r, include = FALSE}
+
+
+novel_clean %>%
+  count(word, sort = TRUE)
+```
+
+```{r, echo = FALSE}
+ggplot(data = novel_clean %>%
+         group_by(snapshot) %>%
+         summarise(count = n()), aes(x = snapshot, y = count, group = 1)) +
+  geom_line() +
+  theme_dark() +
+  labs(title = "", x = "" , y = "",
+       subtitle = "",
+       caption = expression(paste(italic("")))) 
+
+```
+
+
+
+And here are the most used words...
+
+```{r, echo = FALSE, message = FALSE, fig.width = 5, fig.height = 5}
+# TODO - find out how to look at wordcloud per snapshot date using pwalk or similar
+# TODO - remove numbers with stringr
+
+novel_clean %>%
+  anti_join(stop_words) %>%
+  filter(! word %in% c("f0", "85", "it_s", "pardeftab720", "sl360", "u8232", "cf2", "pard", "uc0", "sl280", "partightenfactor0")) %>%
+  count(word) %>%
+  with(wordcloud(word, n, max.words = 120))
+
+```
+
+
